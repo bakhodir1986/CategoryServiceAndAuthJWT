@@ -44,16 +44,24 @@ namespace JwtApp.Controllers
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("DhftOS5uphK3vmCJQrexST1RsyjZBjXWRgJMFPU4"));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            
+            List<Claim> claimsPermission = new List<Claim>();
+            foreach (var action in user.Permissions)
+            {
+                claimsPermission.Add(new Claim("Permission", action));
+            }
 
-            var claims = new[]
+            var claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserName),
                 new Claim(ClaimTypes.Role, user.RoleName)
             };
 
+            claims.AddRange(claimsPermission);
+
             var token = new JwtSecurityToken("https://localhost:47469/",
               "https://localhost:47469/",
-              claims,
+              claims.ToArray(),
               expires: DateTime.Now.AddMinutes(15),
               signingCredentials: credentials);
 
