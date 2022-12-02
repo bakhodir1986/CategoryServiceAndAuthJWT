@@ -80,5 +80,41 @@ namespace JwtApp.Controllers
 
             return null;
         }
+
+        [HttpGet("Manager")]
+        [Authorize(Roles = "Manager")]
+        public IActionResult AdminsEndpoint()
+        {
+            var currentUser = GetCurrentUser();
+
+            return Ok($"Hi {currentUser.UserName}, you are an {currentUser.RoleName}");
+        }
+
+
+        [HttpGet("Buyer")]
+        [Authorize(Roles = "Buyer")]
+        public IActionResult SellersEndpoint()
+        {
+            var currentUser = GetCurrentUser();
+
+            return Ok($"Hi {currentUser.UserName}, you are a {currentUser.RoleName}");
+        }
+
+        private UserModel GetCurrentUser()
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+
+            if (identity != null)
+            {
+                var userClaims = identity.Claims;
+
+                return new UserModel
+                {
+                    UserName = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.NameIdentifier)?.Value,
+                    RoleName = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Role)?.Value
+                };
+            }
+            return null;
+        }
     }
 }
